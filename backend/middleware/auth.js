@@ -12,10 +12,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // ✅ Correctly parse the service account JSON
-//const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
+const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+//const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
 
 // ✅ Initialize Firebase Admin with parsed serviceAccount
 if (!admin.apps.length) {
