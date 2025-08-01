@@ -74,7 +74,9 @@ frontend/*.log
 
 # Node-related
 **/node_modules/
-**/package-lock.json
+#**/package-lock.json
+# Ignore backend lock file but not frontend
+/backend/package-lock.json
 **/yarn.lock
 
 
