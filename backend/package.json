@@ -1,0 +1,30 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/community": "^0.3.48",
+    "@langchain/core": "^0.3.62",
+    "@langchain/google-genai": "^0.2.14",
+    "@qdrant/js-client-rest": "^1.14.1",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.1.0",
+    "express": "^5.1.0",
+    "firebase-admin": "^13.4.0",
+    "mammoth": "^1.9.1",
+    "mongoose": "^8.16.2",
+    "multer": "^2.0.1",
+    "pdf-parse": "^1.1.1",
+    "pptx-parser": "^1.1.7-beta.9"
+  }
+}

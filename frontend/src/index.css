@@ -1,0 +1,82 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Dark theme optimized for chat application */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 8% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 195 100% 65%;
+    --primary-foreground: 240 10% 3.9%;
+
+    --secondary: 240 8% 12%;
+    --secondary-foreground: 0 0% 90%;
+
+    --muted: 240 8% 8%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 8% 15%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 8% 12%;
+    --input: 240 8% 12%;
+    --ring: 195 100% 65%;
+
+    --radius: 0.75rem;
+
+    /* Chat-specific colors */
+    --chat-background: 240 10% 3.9%;
+    --chat-sidebar: 240 8% 6%;
+    --chat-input: 240 8% 12%;
+    --chat-user-message: 195 100% 65%;
+    --chat-bot-message: 240 8% 15%;
+    --chat-border: 240 8% 20%;
+    --chat-hover: 240 8% 8%;
+
+    /* Sidebar tokens */
+    --sidebar-background: 240 8% 6%;
+    --sidebar-foreground: 0 0% 90%;
+    --sidebar-primary: 195 100% 65%;
+    --sidebar-primary-foreground: 240 10% 3.9%;
+    --sidebar-accent: 240 8% 12%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 8% 20%;
+    --sidebar-ring: 195 100% 65%;
+
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(195 100% 65%), hsl(210 100% 70%));
+    --gradient-secondary: linear-gradient(135deg, hsl(240 8% 12%), hsl(240 8% 20%));
+
+    /* Shadows */
+    --shadow-chat: 0 4px 20px -4px hsl(195 100% 65% / 0.1);
+    --shadow-elevated: 0 8px 32px -8px hsl(240 10% 3.9% / 0.6);
+
+    /* Animation */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
