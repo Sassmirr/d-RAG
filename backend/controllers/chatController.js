@@ -1,21 +1,14 @@
-// server/controllers/chatController.js
-
 import mongoose from 'mongoose';
 import ChatSession from '../models/ChatSession.js';
-import { getGeminiResponse } from '../services/geminiService.js';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
+import { getGeminiResponse, getGeminiStreamResponse } from '../services/geminiService.js';
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 import { qdrantClient } from '../services/vectorStore.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import UploadedFile from '../models/UploadedFile.js';
 
-
-const embeddings = new GoogleGenerativeAIEmbeddings({
-  model: 'embedding-001',
-  apiKey: process.env.GEMINI_API_KEY,
+const embeddings = new HuggingFaceInferenceEmbeddings({
+  model: 'sentence-transformers/all-mpnet-base-v2',
+  apiKey: process.env.HUGGINGFACEHUB_API_KEY,
 });
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
 function formatGeminiText(text) {
   return text
@@ -29,20 +22,7 @@ function formatGeminiText(text) {
     .trim();
 }
 
-export async function getGeminiStreamResponse(prompt) {
-  const result = await model.generateContentStream({
-    contents: [{ role: 'user', parts: [{ text: prompt }] }],
-  });
 
-  async function* streamChunks() {
-    for await (const chunk of result.stream) {
-      const part = chunk.text();
-      if (part) yield part;
-    }
-  }
-
-  return streamChunks();
-}
 
 export const createChatSession = async (req, res) => {
   try {
@@ -77,7 +57,18 @@ export const streamChatResponse = async (req, res) => {
   }
 
   try {
-    const embedding = await embeddings.embedQuery(message);
+    // 1. Parallelize initial data gathering
+    const [embedding, chatSession] = await Promise.all([
+      embeddings.embedQuery(message),
+      ChatSession.findOne({ _id: sessionId, userId })
+    ]);
+
+    if (!chatSession) {
+      res.status(404).end('Chat session not found');
+      return;
+    }
+
+    // 2. Perform search as soon as embedding is ready
     const searchResult = await qdrantClient.search('RAG_FILES', {
       vector: embedding,
       limit: 4,
@@ -91,7 +82,6 @@ export const streamChatResponse = async (req, res) => {
     });
 
     const contextChunks = searchResult.map(item => item.payload?.text).filter(Boolean);
-    const chatSession = await ChatSession.findById(sessionId);
     const memory = chatSession.messages.slice(-6).map(m => `${m.sender === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
 
     const prompt = `
@@ -119,7 +109,7 @@ Instructions:
     }
     res.end();
 
-    await ChatSession.findByIdAndUpdate(sessionId, {
+    await ChatSession.findOneAndUpdate({ _id: sessionId, userId }, {
       $push: {
         messages: [
           { sender: 'user', text: message, timestamp: new Date() },

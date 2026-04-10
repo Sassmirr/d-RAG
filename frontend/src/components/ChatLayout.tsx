@@ -26,6 +26,7 @@ import {
 import { ChatMessage } from "./ChatMessage";
 import { auth } from "../firebase";
 import { toast } from 'react-hot-toast';
+import { API_BASE_URL } from "../config";
 
 
 
@@ -76,7 +77,7 @@ export const ChatLayout = ({ user, onLogout }: ChatLayoutProps) => {
     const fetchChatHistory = async () => {
       try {
         const token = await auth.currentUser?.getIdToken(true);
-        const res = await fetch("http://localhost:5000/api/chat/history", {
+        const res = await fetch(`${API_BASE_URL}/api/chat/history`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -94,8 +95,8 @@ export const ChatLayout = ({ user, onLogout }: ChatLayoutProps) => {
     if (!sessionId) return;
     try {
       const token = await auth.currentUser?.getIdToken(true);
-      const res = await fetch(`http://localhost:5000/api/files?sessionId=${sessionId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await fetch(`${API_BASE_URL}/api/files?sessionId=${sessionId}`, {
+          headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (!Array.isArray(data.files)) throw new Error("Invalid file list");
@@ -109,7 +110,7 @@ export const ChatLayout = ({ user, onLogout }: ChatLayoutProps) => {
   const handleChatSelect = async (sessionId: string) => {
   try {
     const token = await auth.currentUser?.getIdToken(true);
-    const res = await fetch(`http://localhost:5000/api/chat/session/${sessionId}`, {
+    const res = await fetch(`${API_BASE_URL}/api/chat/session/${sessionId}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
 
@@ -153,7 +154,7 @@ const handleChatDelete = async (sessionId: string) => {
    setDeletingChatId(sessionId); // trigger loader
   try {
     const token = await auth.currentUser?.getIdToken(true);
-    await fetch(`http://localhost:5000/api/chat/delete/${sessionId}`, {
+    await fetch(`${API_BASE_URL}/api/chat/delete/${sessionId}`, {
       method: "DELETE",
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -189,7 +190,7 @@ const handleChatDelete = async (sessionId: string) => {
 
   // Create session if it doesn't exist
   if (!sessionId) {
-    const res = await fetch("http://localhost:5000/api/chat/create-session", {
+    const res = await fetch(`${API_BASE_URL}/api/chat/create-session`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -235,7 +236,7 @@ const handleChatDelete = async (sessionId: string) => {
   ]);
 
   try {
-    const res = await fetch("http://localhost:5000/api/chat/stream", {
+    const res = await fetch(`${API_BASE_URL}/api/chat/stream`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -248,20 +249,41 @@ const handleChatDelete = async (sessionId: string) => {
 
     const reader = res.body.getReader();
     const decoder = new TextDecoder("utf-8");
-    let partial = "";
+    let fullText = "";
+    let displayedText = "";
+    let isStreamDone = false;
+
+    // Animation function to reveal text smoothly
+    const revealText = () => {
+      if (displayedText.length < fullText.length) {
+        // More deliberate speed: reveal fewer characters per frame for a smoother 'typing' feel
+        const diff = fullText.length - displayedText.length;
+        const charsToReveal = Math.min(Math.max(1, Math.ceil(diff / 30)), 3); 
+        
+        displayedText += fullText.slice(displayedText.length, displayedText.length + charsToReveal);
+        
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === assistantId ? { ...msg, content: displayedText } : msg
+          )
+        );
+      }
+
+      if (!isStreamDone || displayedText.length < fullText.length) {
+        requestAnimationFrame(() => setTimeout(revealText, 10));
+      }
+    };
+
+    // Start animation loop
+    revealText();
 
     while (true) {
       const { done, value } = await reader.read();
-      if (done) break;
-      const chunk = decoder.decode(value, { stream: true });
-      partial += chunk;
-
-      // Word-by-word (or character-by-character) update
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === assistantId ? { ...msg, content: partial } : msg
-        )
-      );
+      if (done) {
+        isStreamDone = true;
+        break;
+      }
+      fullText += decoder.decode(value, { stream: true });
     }
   } catch (err) {
     // toast({ title: "Streaming Error", description: "Failed to receive stream", variant: "destructive" });
@@ -303,7 +325,7 @@ const uploadSelectedFile = async () => {
 
     // Create session if needed
     if (!sessionId) {
-      const res = await fetch("http://localhost:5000/api/chat/create-session", {
+      const res = await fetch(`${API_BASE_URL}/api/chat/create-session`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -321,7 +343,7 @@ const uploadSelectedFile = async () => {
     formData.append("file", selectedFile);
     formData.append("sessionId", sessionId);
 
-    const res = await fetch("http://localhost:5000/api/upload", {
+    const res = await fetch(`${API_BASE_URL}/api/upload`, {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,
@@ -344,7 +366,7 @@ const uploadSelectedFile = async () => {
 };
   const handleFileDelete = async (fileName: string) => {
     const token = await auth.currentUser?.getIdToken(true);
-    await fetch("http://localhost:5000/api/files/remove", {
+    await fetch(`${API_BASE_URL}/api/files/remove`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({ fileName, sessionId: activeSessionId }),

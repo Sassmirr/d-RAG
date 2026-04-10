@@ -1,25 +1,47 @@
 // server/middleware/auth.js
 import { getAuth } from 'firebase-admin/auth';
 import admin from 'firebase-admin';
-import dotenv from 'dotenv';
-import path from 'path';
+import '../loadEnv.js';
 import { fileURLToPath } from 'url';
+import path from 'path';
 import fs from 'fs';
-
-dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// ✅ Correctly parse the service account JSON
-const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
-const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+// ✅ Dynamic Firebase Configuration
+let serviceAccount;
 
-// ✅ Initialize Firebase Admin with parsed serviceAccount
-if (!admin.apps.length) {
+if (process.env.FIREBASE_PROJECT_ID && process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+  serviceAccount = {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  };
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (err) {
+    console.error('❌ Failed to parse FIREBASE_SERVICE_ACCOUNT env variable:', err.message);
+  }
+}
+
+// Fallback to file if environment variables are not set or incomplete
+if (!serviceAccount) {
+  const serviceAccountPath = path.join(__dirname, '../firebase-service-account.json');
+  if (fs.existsSync(serviceAccountPath)) {
+    serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
+  } else {
+    console.error('❌ Firebase service account configuration missing (env vars or JSON file).');
+  }
+}
+
+// ✅ Initialize Firebase Admin
+if (serviceAccount && !admin.apps.length) {
   admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
   });
+  console.log('✅ Firebase Admin initialized');
 }
 
 export async function verifyFirebaseToken(req, res, next) {

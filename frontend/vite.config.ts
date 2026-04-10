@@ -10,6 +10,7 @@ export default defineConfig(({ mode }) => ({
     port: 3000,
     open: true,
   },
+  envDir: "../",
   plugins: [
     react(),
     mode === 'development' &&

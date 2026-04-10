@@ -1,24 +1,20 @@
-// server/controllers/uploadController.js
-
 import fs from 'fs';
-import pdfParse from 'pdf-parse';
+import pdfParse from 'pdf-parse/lib/pdf-parse.js';
 import { qdrantClient } from '../services/vectorStore.js';
 import UploadedFile from '../models/UploadedFile.js';
 import { QdrantVectorStore } from '@langchain/community/vectorstores/qdrant';
 import { RecursiveCharacterTextSplitter } from 'langchain/text_splitter';
-import { GoogleGenerativeAIEmbeddings } from '@langchain/google-genai';
+import { HuggingFaceInferenceEmbeddings } from "@langchain/community/embeddings/hf";
 import { ensureQdrantIndexes } from '../services/qdrantUtils.js';
-//
 import { v4 as uuidv4 } from 'uuid';
-// Configuration
+
 const COLLECTION_NAME = 'RAG_FILES';
 
-const embeddings = new GoogleGenerativeAIEmbeddings({
-  model: 'embedding-001',
-  apiKey: process.env.GEMINI_API_KEY,
+const embeddings = new HuggingFaceInferenceEmbeddings({
+  model: 'sentence-transformers/all-mpnet-base-v2',
+  apiKey: process.env.HUGGINGFACEHUB_API_KEY,
 });
 
-// Ensure collection and indexes are set up
 await ensureQdrantIndexes();
 
 const vectorStore = await QdrantVectorStore.fromExistingCollection(embeddings, {

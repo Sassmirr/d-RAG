@@ -1,36 +1,28 @@
-# Environment variables
+# Environment & Secrets
 .env
-.env.local
-.env.development
-.env.production
-.env.*.local
-
-# Firebase secrets
+.env.*
 backend/firebase-service-account.json
-# Firebase config (if stored separately)
 firebase.json
 .firebaserc
+firebase.ts
+*.pem
+*.key
+*.cert
 
-# Build outputs (in case you missed any)
+# Common Dependencies
+node_modules/
+**/node_modules/
+package-lock.json
+yarn.lock
+bun.lockb
+
+# Build & Output
+dist/
+dist-ssr/
 build/
 .next/
 out/
-
-# Secrets or credential storage
-*.pem
-*.key
-*.crt
-*.cert
-*.p12
-*.jks
-
-# OS-specific
-Thumbs.db
-
-# Coverage reports (if using testing tools)
 coverage/
-
-# Logs or cache folders
 .cache/
 .nyc_output/
 
@@ -38,58 +30,12 @@ coverage/
 logs
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-node_modules/
-.env
-.env.local
-dist/
-build/
-coverage/
-.cache/
-
-# Backend build/log/cache
-backend/node_modules/
-backend/dist/
-backend/build/
-backend/.cache/
-backend/logs/
-backend/*.log
-
-# Frontend build/log/cache
-frontend/node_modules/
-frontend/dist/
-frontend/build/
-frontend/.cache/
-frontend/logs/
-frontend/*.log
-
-# Node-related
-**/node_modules/
-**/package-lock.json
-**/yarn.lock
-
-
-# System & IDE files
+# OS & IDE
 .DS_Store
+Thumbs.db
 .vscode/
 .idea/
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
 *.suo
-*.ntvs*
-*.njsproj
 *.sln
 *.sw?

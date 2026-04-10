@@ -1,0 +1,16 @@
+@google/generative-ai
+@langchain/community
+@langchain/core
+@langchain/google-genai
+@qdrant/js-client-rest
+body-parser
+cors
+dotenv
+express
+firebase-admin
+mammoth
+mongoose
+multer
+pdf-parse
+pptx-parser
+@huggingface/inference

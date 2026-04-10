@@ -1,10 +1,8 @@
+import './loadEnv.js';
 import express from 'express';
 import cors from 'cors';
 import mongoose from 'mongoose';
 import bodyParser from 'body-parser';
-import dotenv from 'dotenv';
-
-dotenv.config();
 
 import uploadRoutes from './routes/upload.js';
 //import embedRoutes from './routes/embed.js';
@@ -36,8 +34,8 @@ mongoose.connect(process.env.MONGO_URI, {
 
 // Middleware
 app.use(cors({
-  origin: 'http://localhost:3000', // or your deployed frontend URL
-  credentials: true, // if using cookies or Firebase Auth
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000', 
+  credentials: true,
 }));
 app.use(bodyParser.json());
 app.use(express.json());
