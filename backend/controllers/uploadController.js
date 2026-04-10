@@ -38,6 +38,7 @@ export async function handleFileUpload(req, res) {
     if (file.mimetype === 'text/plain') {
       text = fs.readFileSync(file.path, 'utf8');
     } else if (file.mimetype === 'application/pdf') {
+      const pdfParse = (await import('pdf-parse')).default;
       const dataBuffer = fs.readFileSync(file.path);
       const pdfData = await pdfParse(dataBuffer);
       text = pdfData.text;
